@@ -6,7 +6,9 @@ public class LookManager : MonoBehaviour {
 	public LookAtController controller = null;
 	public Transform target;
 	private static float DISTANCE = 5f; // http://www.columbia.edu/~rmk7/HC/HC_Readings/Argyle.pdf
-	private static float visionFieldDeg = 160f;
+	private static float visionFieldDeg = 110f;
+	public GameObject[] triangle;
+	public bool VISU_TRI = false;
 
 	public void Start() {
 		if (controller == null)
@@ -17,6 +19,7 @@ public class LookManager : MonoBehaviour {
 		if (controller == null || !canILook()) {
 			controller.headLookVector = Vector3.forward;
 		} else {
+			Debug.Log("OK");
 			controller.headLookVector = new Vector3(target.position.x, 0f, target.position.z);
 		}
 	}
@@ -24,15 +27,22 @@ public class LookManager : MonoBehaviour {
 	private bool canILook() {
 		float distance = Vector2.Distance(new Vector2(target.position.x, target.position.z), new Vector2(transform.position.x, transform.position.z));
 		
-		Vector2 forward = new Vector2(transform.forward.x, transform.forward.z);
-		Vector2 left = forward.Rotate(-visionFieldDeg/2f);
-		Vector2 right = forward.Rotate(visionFieldDeg/2f);
+		Vector2 forward = new Vector2(transform.forward.x, transform.forward.z)*DISTANCE;
+		Vector2 left = forward.Rotate(visionFieldDeg/2f);
+		Vector2 right = forward.Rotate(-visionFieldDeg/2f);
 		Vector2 me = new Vector2(transform.position.x, transform.position.z);
 		bool inside = myIsInsideTriangle(new Vector2(target.position.x, target.position.z),
 									   me + left,
 									   me,
 									   me + right);
-		Debug.Log(inside);
+
+		/* test visualization triangle */
+		if (VISU_TRI) {
+			triangle[0].transform.position = new Vector3((me + left).x, 0f, (me + left).y);
+			triangle[1].transform.position = new Vector3(me.x, 0f, me.y);
+			triangle[2].transform.position = new Vector3((me + right).x, 0f, (me + right).y);
+		}
+		// Debug.Log(distance < DISTANCE && inside);
 		return distance < DISTANCE && inside;
 	}
 
